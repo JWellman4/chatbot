@@ -108,4 +108,4 @@ with col1:
         st.write('🤖 DUB Bot:', bot_response)
 
 with col2: 
-    st.image('C:/Users/jonat/OneDrive/Desktop/chatbot-removebg-preview.png', width=400)
+    st.image('chatbot-removebg-preview.png', width=400)
