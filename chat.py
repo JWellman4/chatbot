@@ -17,13 +17,17 @@ state_code = "Enter State Code:"
 def get_current_day():
     return datetime.now().strftime("%A, %b %d, %Y")
 
-def get_local_time(location):
+def get_local_time(user_location):
     try:
-        timezone = pytz.timezone(location)
+        weather_data = requests.get(f'https://api.openweathermap.org/data/2.5/weather?q={user_location}, {state_code}&appid={api_key}')
+        data = weather_data.json()
+        timezone_offset = data['timezone']  # Offset in seconds
+        timezone = pytz.FixedOffset(timezone_offset / 60)  # Convert offset to minutes
         local_time = datetime.now(timezone)
         return local_time.strftime("%#I:%M %p")
-    except pytz.exceptions.UnknownTimeZoneError:
-        return None
+    except Exception as e:
+        print(e)
+    return None
 
 def tomorrows_day():
     return (datetime.now() + timedelta(days=1)).strftime("%A, %b %d, %Y")
@@ -75,7 +79,7 @@ responses = {
     "hi": ["Hello!", "Hi there!", "Hey!"],
     "what day is it?": ["Today is " + get_current_day()],
     "what is tomorrow's date?": ["Tomorrow is " + tomorrows_day()],   
-    "what time is it now?": ["The time is " + get_local_time("America/New_York") + " EST."], 
+    "what time is it now?": ["Enter your location to get the current time."],
     "what is the stock value?": ["Enter the ticker symbol"],
     "tell me the weather": ["Enter the location"],
     "where are you going this weekend?": ["Robot Land in Seoul, South Korea", "Robot Restaurant in Toyko, Japan"],
@@ -98,6 +102,16 @@ def chat(user_input):
     elif user_input.lower() == 'tell me the weather':
         weather_location = get_weather_location()
         return get_weather_value(weather_location)
+    elif user_input.lower() == 'what time is it now?':
+        user_location = get_weather_location()
+        if user_location:
+            local_time = get_local_time(user_location)
+            if local_time:
+                return f"The current time in {user_location} is {local_time}."
+            else:
+                return "Error: Unable to determine the time for this location."
+        else:
+            return "Error: Please enter a location."
     elif user_input in responses:
         return random.choice(responses[user_input])
     else:
