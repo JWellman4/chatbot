@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 import yfinance as yf
 import requests
+import pytz
 
 st.set_page_config(
     layout='wide',
@@ -16,8 +17,13 @@ state_code = "Enter State Code:"
 def get_current_day():
     return datetime.now().strftime("%A, %b %d, %Y")
 
-def get_current_time():
-    return datetime.now().strftime("%#I:%M %p")
+def get_local_time(location):
+    try:
+        timezone = pytz.timezone(location)
+        local_time = datetime.now(timezone)
+        return local_time.strftime("%#I:%M %p")
+    except pytz.exceptions.UnknownTimeZoneError:
+        return None
 
 def tomorrows_day():
     return (datetime.now() + timedelta(days=1)).strftime("%A, %b %d, %Y")
@@ -69,7 +75,7 @@ responses = {
     "hi": ["Hello!", "Hi there!", "Hey!"],
     "what day is it?": ["Today is " + get_current_day()],
     "what is tomorrow's date?": ["Tomorrow is " + tomorrows_day()],   
-    "what time is it now?": ["The time is " + get_current_time()],
+    "what time is it now?": ["The time is " + get_local_time("America/New_York") + " EST."], 
     "what is the stock value?": ["Enter the ticker symbol"],
     "tell me the weather": ["Enter the location"],
     "where are you going this weekend?": ["Robot Land in Seoul, South Korea", "Robot Restaurant in Toyko, Japan"],
